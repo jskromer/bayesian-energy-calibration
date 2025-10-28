@@ -1,0 +1,10 @@
+{
+  "report_date": "2025-10-28T18:49:56.023851",
+  "baseline_kwh": 449389,
+  "actual_kwh": 380000,
+  "weather_adjustment": 1.02,
+  "actual_normalized_kwh": 387600.0,
+  "savings_kwh": 61789.0,
+  "savings_pct": 13.749557732832802,
+  "cost_savings_usd": 7414.679999999999
+}

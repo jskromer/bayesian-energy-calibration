@@ -1,0 +1,39 @@
+{
+  "DTABM_Baseline": {
+    "version": "1.0.0",
+    "created": "2025-10-28T18:49:56.016431",
+    "description": "Calibrated pre-retrofit baseline (FROZEN)",
+    "idf_file": "/workspace/energyplus-mcp-server/calibration_workflow/baseline_calibrated.idf",
+    "status": "frozen",
+    "last_validation": null
+  },
+  "DTABM_Operational": {
+    "version": "1.0.0",
+    "created": "2025-10-28T18:49:56.016436",
+    "description": "Current operational model (LIVE - updates monthly)",
+    "idf_file": "/workspace/energyplus-mcp-server/digital_twin/DTABM_Operational_v1.0.0.idf",
+    "status": "active",
+    "last_update": "2025-10-28T18:49:56.017617",
+    "update_frequency": "monthly"
+  },
+  "DTActual": {
+    "version": "1.1.0",
+    "created": "2025-10-28T18:49:56.020897",
+    "description": "Post-ECM model reflecting actual changes",
+    "idf_file": "/workspace/energyplus-mcp-server/digital_twin/DTActual_v1.1.0.idf",
+    "ecms_implemented": [
+      {
+        "ecm_name": "LED_Lighting_Retrofit",
+        "description": "Replace T8 fluorescent with LED fixtures",
+        "implementation_date": "2025-10-28T18:49:56.022741",
+        "modifications": {
+          "lighting": {
+            "reduction_factor": 0.5
+          }
+        }
+      }
+    ],
+    "status": "needs_recalibration",
+    "last_update": "2025-10-28T18:49:56.022744"
+  }
+}

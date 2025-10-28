@@ -1,0 +1,320 @@
+{
+  "audit_date": "2025-10-28",
+  "building": {
+    "building_name": "Example Office Building",
+    "address": "123 Main St, Chicago, IL",
+    "building_type": "Office",
+    "year_built": 1995,
+    "gross_area_sqft": 25000,
+    "conditioned_area_sqft": 23500,
+    "num_floors": 3,
+    "floor_to_floor_height_ft": 13,
+    "operating_hours": {
+      "weekday": "7:00 AM - 6:00 PM",
+      "saturday": "Closed",
+      "sunday": "Closed"
+    },
+    "num_occupants": 75
+  },
+  "envelope": {
+    "walls": {
+      "construction": "Brick veneer with batt insulation",
+      "r_value": 11,
+      "measured_thickness_inches": 10,
+      "condition": "Fair - some air leakage noted"
+    },
+    "roof": {
+      "construction": "Built-up roof with rigid insulation",
+      "r_value": 15,
+      "age_years": 15,
+      "condition": "Good"
+    },
+    "windows": {
+      "type": "Double-pane, aluminum frame",
+      "u_factor": 0.55,
+      "shgc": 0.6,
+      "window_to_wall_ratio": 0.35,
+      "condition": "Original, some seal failures"
+    },
+    "infiltration": {
+      "blower_door_test": false,
+      "estimated_ach50": 12,
+      "notes": "Visible gaps around doors, windows"
+    }
+  },
+  "hvac": {
+    "system_type": "Packaged Rooftop Units (RTUs)",
+    "units": [
+      {
+        "unit_id": "RTU-1",
+        "serves": "Floors 1-2",
+        "capacity_tons": 15,
+        "manufacturer": "Carrier",
+        "model": "48TFE015",
+        "year_installed": 2005,
+        "efficiency_eer": 10.5,
+        "heating_type": "Natural gas furnace",
+        "heating_efficiency_afue": 0.8,
+        "condition": "Fair - maintenance irregular",
+        "economizer": true,
+        "economizer_working": false
+      },
+      {
+        "unit_id": "RTU-2",
+        "serves": "Floor 3",
+        "capacity_tons": 10,
+        "manufacturer": "Trane",
+        "model": "YCD120",
+        "year_installed": 2008,
+        "efficiency_eer": 11.0,
+        "heating_type": "Natural gas furnace",
+        "heating_efficiency_afue": 0.82,
+        "condition": "Good",
+        "economizer": true,
+        "economizer_working": true
+      }
+    ],
+    "thermostat_schedule": {
+      "occupied_cooling_setpoint_f": 73,
+      "occupied_heating_setpoint_f": 70,
+      "unoccupied_cooling_setpoint_f": 78,
+      "unoccupied_heating_setpoint_f": 65
+    },
+    "duct_leakage": {
+      "tested": false,
+      "estimated_leakage_pct": 15,
+      "notes": "Visible gaps at connections, poor sealing"
+    }
+  },
+  "lighting": {
+    "spaces": [
+      {
+        "space_type": "Open Office",
+        "area_sqft": 15000,
+        "fixture_type": "2x4 T8 fluorescent troffer",
+        "lamps_per_fixture": 3,
+        "watts_per_lamp": 32,
+        "num_fixtures": 300,
+        "total_watts": 28800,
+        "lpd_w_per_sqft": 1.92,
+        "hours_per_day": 10,
+        "occupancy_sensor": false,
+        "daylight_sensor": false
+      },
+      {
+        "space_type": "Private Offices",
+        "area_sqft": 4500,
+        "fixture_type": "2x4 T8 fluorescent",
+        "lamps_per_fixture": 2,
+        "watts_per_lamp": 32,
+        "num_fixtures": 90,
+        "total_watts": 5760,
+        "lpd_w_per_sqft": 1.28,
+        "hours_per_day": 10,
+        "occupancy_sensor": false,
+        "daylight_sensor": false
+      },
+      {
+        "space_type": "Corridors/Restrooms",
+        "area_sqft": 2500,
+        "fixture_type": "2x2 T8 fluorescent",
+        "lamps_per_fixture": 2,
+        "watts_per_lamp": 17,
+        "num_fixtures": 50,
+        "total_watts": 1700,
+        "lpd_w_per_sqft": 0.68,
+        "hours_per_day": 12,
+        "occupancy_sensor": false,
+        "daylight_sensor": false
+      },
+      {
+        "space_type": "Parking Lot",
+        "area_sqft": 30000,
+        "fixture_type": "Metal Halide pole lights",
+        "watts_per_fixture": 400,
+        "num_fixtures": 12,
+        "total_watts": 4800,
+        "hours_per_day": 12,
+        "condition": "Poor efficiency, frequent failures"
+      }
+    ],
+    "total_interior_lpd": 1.54,
+    "control_issues": [
+      "Many lights left on after hours",
+      "No automatic shutoff",
+      "Occupancy sensors not used"
+    ]
+  },
+  "equipment": {
+    "office_equipment": {
+      "computers": 75,
+      "watts_per_computer": 150,
+      "monitors": 75,
+      "watts_per_monitor": 50,
+      "printers_copiers": 8,
+      "watts_per_unit": 500,
+      "usage_hours_per_day": 9
+    },
+    "kitchen_breakroom": {
+      "refrigerators": 3,
+      "microwaves": 2,
+      "coffee_makers": 2,
+      "vending_machines": 2
+    },
+    "estimated_plug_load_density": 1.2,
+    "notes": "Equipment left on 24/7, no power management"
+  },
+  "occupancy": {
+    "typical_weekday": {
+      "peak_occupancy": 75,
+      "peak_time": "10:00 AM - 3:00 PM",
+      "arrival_time": "7:00 AM - 9:00 AM",
+      "departure_time": "4:00 PM - 6:00 PM"
+    },
+    "weekend": "Closed - security only",
+    "holidays": 10,
+    "density_people_per_1000sqft": 3.2
+  },
+  "utility_data": {
+    "electricity": {
+      "utility": "ComEd",
+      "account": "1234567890",
+      "rate_structure": "Commercial - Time of Use",
+      "monthly_kwh": [
+        [
+          "2024-01",
+          28500,
+          3420
+        ],
+        [
+          "2024-02",
+          26800,
+          3216
+        ],
+        [
+          "2024-03",
+          29200,
+          3504
+        ],
+        [
+          "2024-04",
+          31500,
+          3780
+        ],
+        [
+          "2024-05",
+          36800,
+          4416
+        ],
+        [
+          "2024-06",
+          42500,
+          5100
+        ],
+        [
+          "2024-07",
+          48200,
+          5784
+        ],
+        [
+          "2024-08",
+          47800,
+          5736
+        ],
+        [
+          "2024-09",
+          39500,
+          4740
+        ],
+        [
+          "2024-10",
+          33200,
+          3984
+        ],
+        [
+          "2024-11",
+          30500,
+          3660
+        ],
+        [
+          "2024-12",
+          29800,
+          3576
+        ]
+      ],
+      "annual_kwh": 424300,
+      "annual_cost": 50916,
+      "avg_rate_per_kwh": 0.12,
+      "demand_charges": "Yes - $15/kW peak"
+    },
+    "natural_gas": {
+      "utility": "Peoples Gas",
+      "account": "9876543210",
+      "monthly_therms": [
+        [
+          "2024-01",
+          2850,
+          3135
+        ],
+        [
+          "2024-02",
+          2650,
+          2915
+        ],
+        [
+          "2024-03",
+          2150,
+          2365
+        ],
+        [
+          "2024-04",
+          1200,
+          1320
+        ],
+        [
+          "2024-05",
+          450,
+          495
+        ],
+        [
+          "2024-06",
+          280,
+          308
+        ],
+        [
+          "2024-07",
+          250,
+          275
+        ],
+        [
+          "2024-08",
+          240,
+          264
+        ],
+        [
+          "2024-09",
+          380,
+          418
+        ],
+        [
+          "2024-10",
+          950,
+          1045
+        ],
+        [
+          "2024-11",
+          1850,
+          2035
+        ],
+        [
+          "2024-12",
+          2680,
+          2948
+        ]
+      ],
+      "annual_therms": 15930,
+      "annual_cost": 17523,
+      "avg_rate_per_therm": 1.1
+    }
+  }
+}

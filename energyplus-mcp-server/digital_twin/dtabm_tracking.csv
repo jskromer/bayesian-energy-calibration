@@ -1,0 +1,2 @@
+date,predicted_kwh,actual_kwh,error_pct,model_version
+2025-10-28,37449.083333333336,38500,2.806254714734889,1.0.0

@@ -1,0 +1,9 @@
+{
+  "year1_baseline_elec_kwh": 403634.1771282598,
+  "year2_reported_elec_kwh": 403634.1771282598,
+  "nonroutine_adjustment_kwh": 0.0,
+  "year2_adjusted_routine_kwh": 403634.1771282598,
+  "routine_change_kwh": 0.0,
+  "nonroutine_period": "July-December Year 2",
+  "nonroutine_event": "Server room addition (40 W/m\u00b2, 550 m\u00b2)"
+}
