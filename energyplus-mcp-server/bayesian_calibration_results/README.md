@@ -2,13 +2,15 @@
 
 ## 🌐 View the Interactive Website
 
-**Open the analysis in your browser:**
+**[View Live Demo →](https://bayesian-calibration-results.vercel.app)**
+
+Or open locally in your browser:
 
 ```
 file:///workspace/energyplus-mcp-server/bayesian_calibration_results/index.html
 ```
 
-Or if you're running a local web server:
+Or run a local web server:
 
 ```bash
 cd /workspace/energyplus-mcp-server/bayesian_calibration_results
