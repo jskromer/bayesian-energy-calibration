@@ -1,3 +1,5 @@
 {
-  "outputDirectory": "bayesian_calibration_results"
+  "buildCommand": null,
+  "installCommand": null,
+  "outputDirectory": "energyplus-mcp-server/bayesian_calibration_results"
 }
