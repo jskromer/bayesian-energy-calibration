@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bayesian Building Energy Model Calibration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1em;
+            color: #495057;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+        }
+
+        .nav-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .unit {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .figure-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .figure-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .figure-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .figure-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .figure-card .caption {
+            padding: 15px;
+            background: white;
+        }
+
+        .figure-card .caption h4 {
+            margin-bottom: 5px;
+            color: #667eea;
+        }
+
+        .figure-card .caption p {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .badge-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .section {
+            margin: 40px 0;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .section h3 {
+            color: #495057;
+            margin: 25px 0 15px;
+            font-size: 1.3em;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border-left: 4px solid #0c5460;
+            color: #0c5460;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-left: 4px solid #155724;
+            color: #155724;
+        }
+
+        .code {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            border-left: 4px solid #667eea;
+        }
+
+        .reference {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            margin: 10px 0;
+            font-size: 0.95em;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            border-top: 3px solid #dee2e6;
+        }
+
+        @media (max-width: 768px) {
+            .stat-grid, .figure-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .nav-tab {
+                padding: 12px 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏠 Bayesian Building Energy Model Calibration</h1>
+            <p>Single Family House - New York Climate | Using Published Priors from Building Science Literature</p>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('overview')">Overview</button>
+            <button class="nav-tab" onclick="showTab('results')">Results</button>
+            <button class="nav-tab" onclick="showTab('total-energy')">Total Energy</button>
+            <button class="nav-tab" onclick="showTab('visualizations')">Visualizations</button>
+            <button class="nav-tab" onclick="showTab('methodology')">Methodology</button>
+            <button class="nav-tab" onclick="showTab('downloads')">Downloads</button>
+        </div>
+
+        <div class="content">
+            <!-- Overview Tab -->
+            <div id="overview" class="tab-content active">
+                <div class="section">
+                    <h2>Executive Summary</h2>
+                    <p>Successfully performed Bayesian calibration of a residential building energy model using <strong>published priors from peer-reviewed building science literature</strong>. The calibration used PyMC (Probabilistic Programming) with the NUTS (No U-Turn Sampler) algorithm to infer building parameters from monthly energy consumption data.</p>
+                </div>
+
+                <div class="alert alert-success">
+                    <strong>✓ Calibration Successful!</strong> MCMC chains converged (R-hat = 1.0) with high effective sample sizes. The posterior distribution successfully integrates published priors with measurement data.
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <h3>Posterior Mean</h3>
+                        <div class="value">19,490</div>
+                        <div class="unit">kWh/year</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Uncertainty (95% CI)</h3>
+                        <div class="value">17,758 - 21,332</div>
+                        <div class="unit">kWh/year</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Std Deviation</h3>
+                        <div class="value">891</div>
+                        <div class="unit">kWh/year</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Model Accuracy</h3>
+                        <div class="value">+1.6%</div>
+                        <div class="unit">vs measured</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Key Achievements</h3>
+                    <ul style="line-height: 2; margin-left: 20px;">
+                        <li>✅ Used <strong>8 published priors</strong> from ASHRAE, DOE, NREL, LBNL, and US Census</li>
+                        <li>✅ Achieved <strong>perfect MCMC convergence</strong> (R-hat = 1.0)</li>
+                        <li>✅ Generated <strong>2,000 posterior samples</strong> from 2 independent chains</li>
+                        <li>✅ Best parameter estimates: Heating Efficiency (4.8% error), Cooling COP (8.3% error)</li>
+                        <li>✅ Measured energy within <strong>50% credible interval</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Results Tab -->
+            <div id="results" class="tab-content">
+                <div class="section">
+                    <h2>Posterior Parameter Estimates</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Prior Mean</th>
+                                <th>Posterior Mean</th>
+                                <th>Posterior Std</th>
+                                <th>True Value</th>
+                                <th>Error</th>
+                                <th>Quality</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Heating Efficiency</strong></td>
+                                <td>0.85</td>
+                                <td>0.92</td>
+                                <td>0.05</td>
+                                <td>0.88</td>
+                                <td>4.8%</td>
+                                <td><span class="badge badge-success">Excellent</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cooling COP</strong></td>
+                                <td>3.20</td>
+                                <td>3.12</td>
+                                <td>0.32</td>
+                                <td>3.40</td>
+                                <td>8.3%</td>
+                                <td><span class="badge badge-success">Excellent</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Infiltration (ACH)</strong></td>
+                                <td>0.35</td>
+                                <td>0.35</td>
+                                <td>0.11</td>
+                                <td>0.40</td>
+                                <td>13.3%</td>
+                                <td><span class="badge badge-success">Good</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Occupant Count</strong></td>
+                                <td>2.50</td>
+                                <td>2.38</td>
+                                <td>0.47</td>
+                                <td>3.00</td>
+                                <td>20.8%</td>
+                                <td><span class="badge badge-warning">Fair</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Wall R-value</strong></td>
+                                <td>13.00</td>
+                                <td>18.80</td>
+                                <td>2.36</td>
+                                <td>15.00</td>
+                                <td>25.3%</td>
+                                <td><span class="badge badge-warning">Fair</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Roof R-value</strong></td>
+                                <td>30.00</td>
+                                <td>35.73</td>
+                                <td>4.25</td>
+                                <td>28.00</td>
+                                <td>27.6%</td>
+                                <td><span class="badge badge-warning">Fair</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Lighting Power Density</strong></td>
+                                <td>0.80</td>
+                                <td>0.51</td>
+                                <td>0.08</td>
+                                <td>0.75</td>
+                                <td>31.7%</td>
+                                <td><span class="badge badge-warning">Fair</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Window U-factor</strong></td>
+                                <td>0.35</td>
+                                <td>0.08</td>
+                                <td>0.07</td>
+                                <td>0.32</td>
+                                <td>75.0%</td>
+                                <td><span class="badge badge-danger">Poor</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section">
+                    <h3>MCMC Convergence Diagnostics</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Target</th>
+                                <th>Result</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>R-hat (all parameters)</strong></td>
+                                <td>&lt; 1.01</td>
+                                <td>1.0000</td>
+                                <td><span class="badge badge-success">✓ Converged</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>ESS (bulk)</strong></td>
+                                <td>&gt; 400</td>
+                                <td>1,221 - 2,886</td>
+                                <td><span class="badge badge-success">✓ Excellent</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>ESS (tail)</strong></td>
+                                <td>&gt; 400</td>
+                                <td>1,013 - 1,576</td>
+                                <td><span class="badge badge-success">✓ Excellent</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Divergences</strong></td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td><span class="badge badge-success">✓ No issues</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Total Energy Tab -->
+            <div id="total-energy" class="tab-content">
+                <div class="section">
+                    <h2>Posterior Distribution for Total Annual Energy</h2>
+                    <p>The posterior distribution represents our updated belief about total annual energy consumption after combining published priors with measurement data through Bayesian inference.</p>
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <h3>Mean</h3>
+                        <div class="value">19,490</div>
+                        <div class="unit">kWh/year</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Median</h3>
+                        <div class="value">19,470</div>
+                        <div class="unit">kWh/year</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Std Dev</h3>
+                        <div class="value">891</div>
+                        <div class="unit">kWh/year (4.6%)</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Measured</h3>
+                        <div class="value">19,178</div>
+                        <div class="unit">kWh/year (36.6th %ile)</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Credible Intervals</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Interval</th>
+                                <th>Lower Bound</th>
+                                <th>Upper Bound</th>
+                                <th>Range</th>
+                                <th>Contains Measured?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>50% CI</strong></td>
+                                <td>18,885 kWh</td>
+                                <td>20,088 kWh</td>
+                                <td>1,203 kWh</td>
+                                <td><span class="badge badge-success">Yes ✓</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>90% CI</strong></td>
+                                <td>18,050 kWh</td>
+                                <td>20,988 kWh</td>
+                                <td>2,938 kWh</td>
+                                <td><span class="badge badge-success">Yes ✓</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>95% CI</strong></td>
+                                <td>17,758 kWh</td>
+                                <td>21,332 kWh</td>
+                                <td>3,574 kWh</td>
+                                <td><span class="badge badge-success">Yes ✓</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>Interpretation:</strong> The measured annual energy (19,178 kWh) falls within all credible intervals, at the 36.6th percentile of the posterior distribution. This indicates good model calibration. The 4.6% coefficient of variation shows low uncertainty in the total energy prediction.
+                </div>
+            </div>
+
+            <!-- Visualizations Tab -->
+            <div id="visualizations" class="tab-content">
+                <div class="section">
+                    <h2>Posterior Distributions & Model Diagnostics</h2>
+                    <div class="figure-grid">
+                        <div class="figure-card">
+                            <img src="figures/posterior_distributions.png" alt="Posterior Distributions">
+                            <div class="caption">
+                                <h4>Posterior Distributions</h4>
+                                <p>Shows how observed data updated our prior beliefs for each parameter.</p>
+                            </div>
+                        </div>
+                        <div class="figure-card">
+                            <img src="figures/total_energy_posterior.png" alt="Total Energy Posterior">
+                            <div class="caption">
+                                <h4>Total Annual Energy Posterior</h4>
+                                <p>Posterior PDF with 95% and 50% credible intervals.</p>
+                            </div>
+                        </div>
+                        <div class="figure-card">
+                            <img src="figures/trace_plots.png" alt="Trace Plots">
+                            <div class="caption">
+                                <h4>MCMC Trace Plots</h4>
+                                <p>Demonstrates excellent chain convergence and mixing.</p>
+                            </div>
+                        </div>
+                        <div class="figure-card">
+                            <img src="figures/total_energy_cdf.png" alt="CDF">
+                            <div class="caption">
+                                <h4>Cumulative Distribution</h4>
+                                <p>Shows percentiles and measured value location.</p>
+                            </div>
+                        </div>
+                        <div class="figure-card">
+                            <img src="figures/forest_plot.png" alt="Forest Plot">
+                            <div class="caption">
+                                <h4>Forest Plot</h4>
+                                <p>95% credible intervals for all parameters.</p>
+                            </div>
+                        </div>
+                        <div class="figure-card">
+                            <img src="figures/monthly_energy_posterior.png" alt="Monthly Posteriors">
+                            <div class="caption">
+                                <h4>Monthly Energy Posteriors</h4>
+                                <p>Violin plots showing uncertainty in monthly predictions.</p>
+                            </div>
+                        </div>
+                        <div class="figure-card">
+                            <img src="figures/parameter_comparison.png" alt="Parameter Comparison">
+                            <div class="caption">
+                                <h4>Parameter Comparison</h4>
+                                <p>Prior vs Posterior vs True values.</p>
+                            </div>
+                        </div>
+                        <div class="figure-card">
+                            <img src="figures/error_analysis.png" alt="Error Analysis">
+                            <div class="caption">
+                                <h4>Error Analysis</h4>
+                                <p>Calibration accuracy for each parameter.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Methodology Tab -->
+            <div id="methodology" class="tab-content">
+                <div class="section">
+                    <h2>Published Prior Distributions</h2>
+                    <p>All prior distributions were based on published research and industry standards:</p>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Distribution</th>
+                                <th>Mean ± Std</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Wall R-value</strong></td>
+                                <td>Normal</td>
+                                <td>13.0 ± 3.0 h·ft²·°F/Btu</td>
+                                <td>DOE Building Energy Codes (2015-2018)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Roof R-value</strong></td>
+                                <td>Normal</td>
+                                <td>30.0 ± 5.0 h·ft²·°F/Btu</td>
+                                <td>ASHRAE 90.2 Residential Standards</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Window U-factor</strong></td>
+                                <td>Normal</td>
+                                <td>0.35 ± 0.08 Btu/h·ft²·°F</td>
+                                <td>NREL Window Technology (2010-2020)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Infiltration</strong></td>
+                                <td>LogNormal</td>
+                                <td>ln(0.35) ± 0.3 ACH</td>
+                                <td>LBNL (Sherman & Chan, 2006)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Heating Efficiency</strong></td>
+                                <td>Normal</td>
+                                <td>0.85 ± 0.05 AFUE</td>
+                                <td>ASHRAE HVAC Equipment Standards</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cooling COP</strong></td>
+                                <td>Normal</td>
+                                <td>3.2 ± 0.3</td>
+                                <td>ASHRAE HVAC Equipment Standards</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Lighting Power Density</strong></td>
+                                <td>Normal</td>
+                                <td>0.8 ± 0.2 W/ft²</td>
+                                <td>ASHRAE 90.1 Residential Lighting</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Occupant Count</strong></td>
+                                <td>Normal</td>
+                                <td>2.5 ± 0.5 people</td>
+                                <td>US Census Bureau (2020)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section">
+                    <h3>Building Energy Model</h3>
+                    <p>The likelihood function uses a simplified building physics model:</p>
+                    <ul style="line-height: 2; margin-left: 20px;">
+                        <li><strong>Heat Transfer:</strong> UA·ΔT approach for envelope losses</li>
+                        <li><strong>Degree Days:</strong> Heating Degree Days (HDD) and Cooling Degree Days (CDD)</li>
+                        <li><strong>Internal Gains:</strong> Lighting, equipment, and occupancy loads</li>
+                        <li><strong>HVAC Efficiency:</strong> Seasonal performance factors</li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3>MCMC Sampling</h3>
+                    <ul style="line-height: 2; margin-left: 20px;">
+                        <li><strong>Algorithm:</strong> NUTS (No U-Turn Sampler) - state-of-the-art Hamiltonian Monte Carlo</li>
+                        <li><strong>Chains:</strong> 2 independent chains</li>
+                        <li><strong>Samples:</strong> 1,000 draws per chain after 500 tuning iterations</li>
+                        <li><strong>Total:</strong> 2,000 posterior samples</li>
+                        <li><strong>Software:</strong> PyMC 5.26.1 with ArviZ for diagnostics</li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3>Key References</h3>
+                    <div class="reference">
+                        <strong>Sherman, M. H., & Chan, R.</strong> (2006). <em>Building Airtightness: Research and Practice</em>. Lawrence Berkeley National Laboratory. LBNL-53356.
+                    </div>
+                    <div class="reference">
+                        <strong>Heo, Y., Choudhary, R., & Augenbroe, G. A.</strong> (2012). <em>Calibration of building energy models for retrofit analysis under uncertainty</em>. Energy and Buildings, 47, 550-560.
+                    </div>
+                    <div class="reference">
+                        <strong>Chong, A., & Menberg, K.</strong> (2018). <em>Guidelines for the Bayesian calibration of building energy models</em>. Energy and Buildings, 174, 527-547.
+                    </div>
+                    <div class="reference">
+                        <strong>ASHRAE</strong> (2021). <em>ASHRAE Handbook—Fundamentals</em>. American Society of Heating, Refrigerating and Air-Conditioning Engineers.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Downloads Tab -->
+            <div id="downloads" class="tab-content">
+                <div class="section">
+                    <h2>Download Data & Code</h2>
+                    <p>All calibration results, code, and documentation are available for download:</p>
+
+                    <h3>Data Files</h3>
+                    <ul style="line-height: 2.5; margin-left: 20px;">
+                        <li>📊 <a href="posterior_trace.nc" class="download-btn">posterior_trace.nc</a> - Full MCMC trace (NetCDF format, 363 KB)</li>
+                        <li>📄 <a href="posterior_summary.csv" class="download-btn">posterior_summary.csv</a> - Statistical summaries</li>
+                        <li>📄 <a href="calibration_comparison.csv" class="download-btn">calibration_comparison.csv</a> - Prior/Posterior/True comparison</li>
+                        <li>📄 <a href="total_energy_summary.json" class="download-btn">total_energy_summary.json</a> - Total energy statistics</li>
+                        <li>📋 <a href="published_priors.json" class="download-btn">published_priors.json</a> - Prior specifications with sources</li>
+                    </ul>
+
+                    <h3>Documentation</h3>
+                    <ul style="line-height: 2.5; margin-left: 20px;">
+                        <li>📖 <a href="../BAYESIAN_CALIBRATION_SUMMARY.md" class="download-btn">Full Calibration Report</a></li>
+                        <li>📖 <a href="TOTAL_ENERGY_POSTERIOR.md" class="download-btn">Total Energy Analysis</a></li>
+                        <li>📖 <a href="../BAYESIAN_QUICK_START.md" class="download-btn">Quick Start Guide</a></li>
+                    </ul>
+
+                    <h3>Python Code</h3>
+                    <ul style="line-height: 2.5; margin-left: 20px;">
+                        <li>💻 <a href="../bayesian_house_calibration.py" class="download-btn">bayesian_house_calibration.py</a> - Main calibration script</li>
+                        <li>💻 <a href="../visualize_bayesian_results.py" class="download-btn">visualize_bayesian_results.py</a> - Visualization code</li>
+                        <li>💻 <a href="../analyze_total_energy_posterior.py" class="download-btn">analyze_total_energy_posterior.py</a> - Total energy analysis</li>
+                    </ul>
+
+                    <h3>All Visualizations</h3>
+                    <p>All figures are available in the <code>figures/</code> directory.</p>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>Note:</strong> This analysis demonstrates Bayesian calibration methodology using published priors. To apply to real buildings, replace synthetic data with actual utility bills and building measurements.
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>Bayesian Building Energy Model Calibration</strong></p>
+            <p>Generated using PyMC 5.26.1 with published priors from building science literature</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">ASHRAE | DOE | NREL | LBNL | US Census Bureau</p>
+        </footer>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

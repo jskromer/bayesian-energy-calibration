@@ -1,0 +1,46 @@
+# Netlify configuration for Bayesian Analysis website
+
+[build]
+  # No build step needed - static HTML
+  publish = "bayesian_calibration_results"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[build.environment]
+  # For future Python build steps if needed
+  PYTHON_VERSION = "3.12"
+
+# Headers for better performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache static assets
+[[headers]]
+  for = "/figures/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.json"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+    Content-Type = "application/json"
+
+[[headers]]
+  for = "/*.csv"
+  [headers.values]
+    Content-Type = "text/csv"
+    Content-Disposition = "attachment"

@@ -1,0 +1,58 @@
+{
+  "wall_insulation_r_value": {
+    "distribution": "Normal",
+    "mean": 13.0,
+    "std": 3.0,
+    "unit": "h\u00b7ft\u00b2\u00b7\u00b0F/Btu",
+    "source": "DOE Building Energy Codes (2015-2018 stock)"
+  },
+  "roof_insulation_r_value": {
+    "distribution": "Normal",
+    "mean": 30.0,
+    "std": 5.0,
+    "unit": "h\u00b7ft\u00b2\u00b7\u00b0F/Btu",
+    "source": "ASHRAE 90.2 Residential Standards"
+  },
+  "window_u_factor": {
+    "distribution": "Normal",
+    "mean": 0.35,
+    "std": 0.08,
+    "unit": "Btu/h\u00b7ft\u00b2\u00b7\u00b0F",
+    "source": "NREL Window Technology (2010-2020 stock)"
+  },
+  "infiltration_ach": {
+    "distribution": "LogNormal",
+    "mu": -1.0498221244986778,
+    "sigma": 0.3,
+    "unit": "Air Changes per Hour",
+    "source": "LBNL Residential Infiltration Study (Sherman & Chan, 2006)"
+  },
+  "hvac_efficiency_heating": {
+    "distribution": "Normal",
+    "mean": 0.85,
+    "std": 0.05,
+    "unit": "AFUE (fraction)",
+    "source": "ASHRAE HVAC Equipment Standards"
+  },
+  "hvac_efficiency_cooling": {
+    "distribution": "Normal",
+    "mean": 3.2,
+    "std": 0.3,
+    "unit": "COP",
+    "source": "ASHRAE HVAC Equipment Standards"
+  },
+  "lighting_power_density": {
+    "distribution": "Normal",
+    "mean": 0.8,
+    "std": 0.2,
+    "unit": "W/ft\u00b2",
+    "source": "ASHRAE 90.1 Residential Lighting"
+  },
+  "occupant_density": {
+    "distribution": "Normal",
+    "mean": 2.5,
+    "std": 0.5,
+    "unit": "people",
+    "source": "US Census Bureau (2020)"
+  }
+}

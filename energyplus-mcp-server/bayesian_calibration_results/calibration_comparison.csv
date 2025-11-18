@@ -1,0 +1,9 @@
+parameter,prior_mean,posterior_mean,true_value,error_percent
+Wall R-value,13.0,18.796,15.0,25.30666666666666
+Roof R-value,30.0,35.725,28.0,27.589285714285722
+Window U-factor,0.35,0.08,0.32,75.0
+Infiltration (ACH),0.35,0.347,0.4,13.250000000000012
+Heating Efficiency,0.85,0.922,0.88,4.772727272727277
+Cooling COP,3.2,3.117,3.4,8.323529411764703
+Lighting Power Density,0.8,0.512,0.75,31.73333333333333
+Occupant Count,2.5,2.376,3.0,20.800000000000004
