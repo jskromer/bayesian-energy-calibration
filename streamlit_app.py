@@ -167,6 +167,21 @@ run_calibration = st.sidebar.button(
     use_container_width=True
 )
 
+# Reset button (only show if results exist)
+if 'trace' in st.session_state:
+    st.sidebar.markdown("---")
+    if st.sidebar.button(
+        "🔄 Reset / Start Over",
+        use_container_width=True,
+        help="Clear results and return to the first screen"
+    ):
+        # Clear the calibration results from session state
+        if 'trace' in st.session_state:
+            del st.session_state.trace
+        if 'model' in st.session_state:
+            del st.session_state.model
+        st.rerun()
+
 # ============================================================================
 # SYNTHETIC MEASURED DATA
 # ============================================================================
