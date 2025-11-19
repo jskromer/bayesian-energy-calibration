@@ -8,7 +8,7 @@ Bayesian calibration of residential building energy models using **published pri
 
 ## 🌐 Live Demo
 
-**[View Interactive Results →](https://bayesian-calibration-results.vercel.app)**
+**[View Interactive Results →](https://bayesian-energy-calibration-demo.streamlit.app)**
 
 ## 📊 Key Results
 
