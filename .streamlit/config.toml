@@ -13,3 +13,11 @@ enableXsrfProtection = true
 
 [browser]
 gatherUsageStats = false
+
+[runner]
+fastReruns = true
+enforceSerializableSessionState = false
+
+[client]
+showErrorDetails = true
+toolbarMode = "auto"
