@@ -10,6 +10,41 @@ Bayesian calibration of residential building energy models using **published pri
 
 **[View Interactive Results →](https://bayesian-energy-calibration-demo.streamlit.app)**
 
+## 🎯 How to Use
+
+### Option 1: Interactive Web App (Recommended)
+
+The easiest way to explore the calibration is through our **[Streamlit app](https://bayesian-energy-calibration-demo.streamlit.app)**:
+
+1. **Adjust Parameters**: Use sidebar sliders to modify 8 building parameters (wall R-value, window U-factor, HVAC efficiency, etc.)
+2. **Configure MCMC**: Set samples per chain, tuning samples, and number of chains
+3. **Run Calibration**: Click "🚀 Run Calibration" and wait 1-2 minutes
+4. **Explore Results**: View posterior distributions, convergence diagnostics, and summary statistics
+5. **Download Data**: Export results as CSV and JSON files
+6. **Iterate**: Click "🔄 Reset / Start Over" to try different parameter settings
+
+Perfect for experimenting with different prior distributions in real-time!
+
+### Option 2: Run Locally
+
+For developers who want to customize the model or use their own building data:
+
+```bash
+# Install dependencies
+pip install pymc arviz pandas matplotlib numpy scipy
+
+# Run calibration with your data
+python3 bayesian_house_calibration.py
+
+# Generate visualizations
+python3 visualize_bayesian_results.py
+
+# Analyze results
+python3 analyze_total_energy_posterior.py
+```
+
+See the [Quick Start Guide](#-quick-start) below for more details on local usage.
+
 ## 📊 Key Results
 
 ### Posterior Distribution for Total Annual Energy
