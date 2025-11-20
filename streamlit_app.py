@@ -183,8 +183,70 @@ if 'trace' in st.session_state:
         st.rerun()
 
 # ============================================================================
-# SYNTHETIC MEASURED DATA
+# DATA HANDLING FUNCTIONS
 # ============================================================================
+
+def create_template_csv():
+    """Create a template CSV for utility data upload"""
+    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+    template = pd.DataFrame({
+        'Month': months,
+        'Measured (kWh)': [1500, 1400, 1300, 1200, 1100, 1200,
+                          1400, 1350, 1100, 1200, 1400, 1500],
+        'Uncertainty (kWh)': [75, 70, 65, 60, 55, 60,
+                              70, 67, 55, 60, 70, 75]
+    })
+    return template.to_csv(index=False)
+
+def parse_uploaded_data(uploaded_file):
+    """
+    Parse and validate uploaded utility data CSV
+
+    Returns:
+        tuple: (success: bool, message: str, data: tuple or None)
+    """
+    try:
+        df = pd.read_csv(uploaded_file)
+
+        # Validate required columns
+        required_cols = ['Month', 'Measured (kWh)']
+        if not all(col in df.columns for col in required_cols):
+            return False, f"Missing required columns. Need: {', '.join(required_cols)}", None
+
+        # Validate 12 months of data
+        if len(df) != 12:
+            return False, f"Expected 12 months of data, found {len(df)} rows", None
+
+        # Extract data
+        measured_monthly = df['Measured (kWh)'].values
+
+        # Check for optional uncertainty column
+        if 'Uncertainty (kWh)' in df.columns:
+            measurement_noise_std = df['Uncertainty (kWh)'].values
+        else:
+            # Default: 5% of measured value as uncertainty
+            measurement_noise_std = measured_monthly * 0.05
+
+        # Validate data ranges
+        if np.any(measured_monthly <= 0):
+            return False, "Energy consumption values must be positive", None
+
+        if np.any(measurement_noise_std <= 0):
+            return False, "Uncertainty values must be positive", None
+
+        # Create cleaned dataframe
+        measured_data = pd.DataFrame({
+            'Month': df['Month'].values,
+            'Measured (kWh)': measured_monthly,
+            'Uncertainty (kWh)': measurement_noise_std
+        })
+
+        return True, "Data loaded successfully!", (measured_data, measured_monthly, measurement_noise_std)
+
+    except Exception as e:
+        return False, f"Error parsing file: {str(e)}", None
 
 @st.cache_data
 def generate_measured_data():
@@ -299,8 +361,63 @@ def run_bayesian_calibration(priors, measured_monthly, measurement_noise_std,
 # MAIN APP LAYOUT
 # ============================================================================
 
-# Display measured data
-measured_data, measured_monthly, measurement_noise_std = generate_measured_data()
+# ============================================================================
+# DATA UPLOAD SECTION
+# ============================================================================
+
+st.header("📁 Utility Data")
+
+# Initialize session state for uploaded data
+if 'uploaded_data' not in st.session_state:
+    st.session_state.uploaded_data = None
+
+# Create upload section
+upload_col1, upload_col2 = st.columns([2, 1])
+
+with upload_col1:
+    uploaded_file = st.file_uploader(
+        "Upload your utility bill data (CSV)",
+        type=['csv'],
+        help="Upload a CSV file with monthly energy consumption data. Use the template as a guide."
+    )
+
+    if uploaded_file is not None:
+        success, message, data = parse_uploaded_data(uploaded_file)
+
+        if success:
+            st.success(message)
+            st.session_state.uploaded_data = data
+        else:
+            st.error(message)
+            st.session_state.uploaded_data = None
+
+with upload_col2:
+    # Download template button
+    st.download_button(
+        label="📥 Download CSV Template",
+        data=create_template_csv(),
+        file_name="utility_data_template.csv",
+        mime="text/csv",
+        help="Download a template CSV file to fill in with your utility bill data"
+    )
+
+    # Option to clear uploaded data and use synthetic
+    if st.session_state.uploaded_data is not None:
+        if st.button("🔄 Use Synthetic Data Instead", help="Switch back to example synthetic data"):
+            st.session_state.uploaded_data = None
+            st.rerun()
+
+st.markdown("---")
+
+# Determine which data to use
+if st.session_state.uploaded_data is not None:
+    measured_data, measured_monthly, measurement_noise_std = st.session_state.uploaded_data
+    data_source = "custom"
+    st.info("✅ Using your uploaded utility data")
+else:
+    measured_data, measured_monthly, measurement_noise_std = generate_measured_data()
+    data_source = "synthetic"
+    st.info("ℹ️ Using synthetic example data. Upload your own utility bills above to calibrate with real data.")
 
 col1, col2 = st.columns([1, 1])
 
@@ -473,11 +590,15 @@ else:
     st.markdown("""
     ### How to Use This App
 
-    1. **Adjust Priors**: Use the sidebar controls to modify prior distributions based on your building knowledge
-    2. **Configure MCMC**: Set the number of samples and chains (more = better accuracy but slower)
-    3. **Run Calibration**: Click the run button to execute Bayesian inference
-    4. **Analyze Results**: Explore posterior distributions, convergence diagnostics, and summary statistics
-    5. **Download**: Export results for further analysis or reporting
+    1. **Upload Data** (Optional): Upload your own utility bill data as a CSV file, or use the synthetic example data
+        - Download the CSV template to see the required format
+        - Include 12 months of energy consumption data (kWh)
+        - Optionally include uncertainty values for each month
+    2. **Adjust Priors**: Use the sidebar controls to modify prior distributions based on your building knowledge
+    3. **Configure MCMC**: Set the number of samples and chains (more = better accuracy but slower)
+    4. **Run Calibration**: Click the run button to execute Bayesian inference
+    5. **Analyze Results**: Explore posterior distributions, convergence diagnostics, and summary statistics
+    6. **Download**: Export results for further analysis or reporting
 
     ### About the Model
 
