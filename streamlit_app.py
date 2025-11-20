@@ -12,6 +12,7 @@ import arviz as az
 import matplotlib.pyplot as plt
 import json
 from pathlib import Path
+from datetime import datetime
 
 # Page configuration
 st.set_page_config(
@@ -43,6 +44,14 @@ if 'priors' not in st.session_state:
         "lpd": {"mean": 0.8, "std": 0.2},
         "occupants": {"mean": 2.5, "std": 0.5}
     }
+
+# Initialize session state for model selection
+if 'model_type' not in st.session_state:
+    st.session_state.model_type = "Standard"
+
+# Initialize session state for run history
+if 'run_history' not in st.session_state:
+    st.session_state.run_history = []
 
 # Create expandable sections for each parameter
 with st.sidebar.expander("🧱 Wall Insulation R-Value", expanded=False):
@@ -141,22 +150,53 @@ with st.sidebar.expander("👥 Occupants"):
     st.caption("Source: US Census Bureau")
 
 # ============================================================================
+# MODEL SELECTION
+# ============================================================================
+
+st.sidebar.markdown("---")
+st.sidebar.header("🔧 Model Configuration")
+
+st.session_state.model_type = st.sidebar.radio(
+    "Calibration Mode:",
+    ["Standard", "High-Precision", "Fast"],
+    index=["Standard", "High-Precision", "Fast"].index(st.session_state.model_type),
+    help="Choose the calibration approach"
+)
+
+# Display model descriptions
+model_descriptions = {
+    "Standard": "Balanced accuracy and speed (1000 samples, 2 chains)",
+    "High-Precision": "Maximum accuracy, slower (2000 samples, 4 chains)",
+    "Fast": "Quick exploration, lower precision (500 samples, 1 chain)"
+}
+
+st.sidebar.caption(f"ℹ️ {model_descriptions[st.session_state.model_type]}")
+
+# ============================================================================
 # MCMC SETTINGS
 # ============================================================================
 
 st.sidebar.markdown("---")
 st.sidebar.header("⚙️ MCMC Settings")
 
+# Set defaults based on model type
+if st.session_state.model_type == "Standard":
+    default_draws, default_tune, default_chains = 1000, 500, 2
+elif st.session_state.model_type == "High-Precision":
+    default_draws, default_tune, default_chains = 2000, 1000, 4
+else:  # Fast
+    default_draws, default_tune, default_chains = 500, 200, 1
+
 n_draws = st.sidebar.slider(
-    "Samples per chain", 500, 3000, 1000, 100,
+    "Samples per chain", 500, 3000, default_draws, 100,
     help="More samples = better accuracy but slower"
 )
 n_tune = st.sidebar.slider(
-    "Tuning samples", 200, 1000, 500, 100,
+    "Tuning samples", 200, 1000, default_tune, 100,
     help="Warmup period for MCMC sampler"
 )
 n_chains = st.sidebar.slider(
-    "Number of chains", 1, 4, 2, 1,
+    "Number of chains", 1, 4, default_chains, 1,
     help="Independent MCMC chains for convergence checking"
 )
 
@@ -445,7 +485,7 @@ with col2:
 # ============================================================================
 
 if run_calibration:
-    with st.spinner('🔄 Running Bayesian calibration... This may take 1-2 minutes'):
+    with st.spinner(f'🔄 Running Bayesian calibration ({st.session_state.model_type} mode)... This may take 1-2 minutes'):
 
         # Run calibration
         trace, model = run_bayesian_calibration(
@@ -460,8 +500,15 @@ if run_calibration:
         # Store results in session state
         st.session_state.trace = trace
         st.session_state.model = model
+        st.session_state.current_run_config = {
+            'model_type': st.session_state.model_type,
+            'n_draws': n_draws,
+            'n_tune': n_tune,
+            'n_chains': n_chains,
+            'data_source': data_source
+        }
 
-        st.success('✅ Calibration complete!')
+        st.success(f'✅ Calibration complete using {st.session_state.model_type} mode!')
 
 # Display results if available
 if 'trace' in st.session_state:
@@ -584,6 +631,92 @@ if 'trace' in st.session_state:
             mime="application/json"
         )
 
+    # ============================================================================
+    # RERUN AND MODEL SWITCHING
+    # ============================================================================
+
+    st.markdown("---")
+    st.subheader("🔄 Rerun Calibration")
+
+    # Show current configuration
+    if 'current_run_config' in st.session_state:
+        config = st.session_state.current_run_config
+        st.info(f"**Current run:** {config['model_type']} mode | "
+                f"{config['n_draws']} samples × {config['n_chains']} chains | "
+                f"{config['data_source']} data")
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        if st.button("🔄 Rerun Current Settings", use_container_width=True,
+                     help="Rerun with the same model and parameters"):
+            st.rerun()
+
+    with col2:
+        if st.session_state.model_type != "Fast":
+            if st.button("⚡ Switch to Fast Mode", use_container_width=True,
+                         help="Rerun with faster settings for quick exploration"):
+                st.session_state.model_type = "Fast"
+                # Clear trace to show that we need to rerun
+                if 'trace' in st.session_state:
+                    del st.session_state.trace
+                if 'model' in st.session_state:
+                    del st.session_state.model
+                st.rerun()
+
+    with col3:
+        if st.session_state.model_type != "High-Precision":
+            if st.button("🎯 Switch to High-Precision", use_container_width=True,
+                         help="Rerun with maximum accuracy"):
+                st.session_state.model_type = "High-Precision"
+                # Clear trace to show that we need to rerun
+                if 'trace' in st.session_state:
+                    del st.session_state.trace
+                if 'model' in st.session_state:
+                    del st.session_state.model
+                st.rerun()
+
+    with col4:
+        if st.button("💾 Save to History", use_container_width=True,
+                     help="Save this run for later comparison"):
+            run_name = f"Run {len(st.session_state.run_history) + 1} - {st.session_state.model_type}"
+            st.session_state.run_history.append({
+                'name': run_name,
+                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'trace': st.session_state.trace,
+                'model': st.session_state.model,
+                'config': st.session_state.current_run_config.copy(),
+                'priors': st.session_state.priors.copy()
+            })
+            st.success(f"✅ Saved as '{run_name}'")
+            st.rerun()
+
+    # Display run history if exists
+    if len(st.session_state.run_history) > 0:
+        st.markdown("---")
+        st.subheader("📚 Run History")
+
+        # Create a summary table
+        history_data = []
+        for i, run in enumerate(st.session_state.run_history):
+            history_data.append({
+                'Run': run['name'],
+                'Timestamp': run['timestamp'],
+                'Mode': run['config']['model_type'],
+                'Samples': f"{run['config']['n_draws']} × {run['config']['n_chains']}",
+                'Data': run['config']['data_source']
+            })
+
+        history_df = pd.DataFrame(history_data)
+        st.dataframe(history_df, use_container_width=True)
+
+        # Option to clear history
+        col1, col2 = st.columns([3, 1])
+        with col2:
+            if st.button("🗑️ Clear History", help="Remove all saved runs"):
+                st.session_state.run_history = []
+                st.rerun()
+
 else:
     st.info("👈 Adjust the prior distributions in the sidebar and click '🚀 Run Calibration' to begin")
 
@@ -594,11 +727,19 @@ else:
         - Download the CSV template to see the required format
         - Include 12 months of energy consumption data (kWh)
         - Optionally include uncertainty values for each month
-    2. **Adjust Priors**: Use the sidebar controls to modify prior distributions based on your building knowledge
-    3. **Configure MCMC**: Set the number of samples and chains (more = better accuracy but slower)
-    4. **Run Calibration**: Click the run button to execute Bayesian inference
-    5. **Analyze Results**: Explore posterior distributions, convergence diagnostics, and summary statistics
-    6. **Download**: Export results for further analysis or reporting
+    2. **Select Model**: Choose a calibration mode in the sidebar:
+        - **Standard**: Balanced accuracy and speed (recommended for most users)
+        - **High-Precision**: Maximum accuracy with more samples (slower but more reliable)
+        - **Fast**: Quick exploration for rapid iteration (less precise)
+    3. **Adjust Priors**: Use the sidebar controls to modify prior distributions based on your building knowledge
+    4. **Configure MCMC**: Fine-tune the number of samples and chains (or use the defaults)
+    5. **Run Calibration**: Click the run button to execute Bayesian inference
+    6. **Analyze Results**: Explore posterior distributions, convergence diagnostics, and summary statistics
+    7. **Rerun & Compare**:
+        - Quickly switch between different calibration modes
+        - Save runs to history for comparison
+        - Adjust parameters and rerun to see how they affect results
+    8. **Download**: Export results for further analysis or reporting
 
     ### About the Model
 
@@ -613,6 +754,13 @@ else:
     - **Prior knowledge** from building science literature (ASHRAE, DOE, NREL)
     - **Measured data** from utility bills (monthly energy consumption)
     - **Uncertainty quantification** through MCMC sampling
+
+    ### New Features
+
+    - 🔧 **Model Selection**: Choose between Standard, High-Precision, and Fast calibration modes
+    - 🔄 **Quick Rerun**: Easily switch between modes and rerun calibration
+    - 💾 **Run History**: Save and compare multiple calibration runs
+    - 📊 **Enhanced Tracking**: See which mode and settings were used for each run
     """)
 
 # Footer
