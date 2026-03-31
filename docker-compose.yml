@@ -1,0 +1,25 @@
+services:
+  energyplus-mcp:
+    container_name: energyplus-mcp
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    user: root
+    working_dir: /workspace/energyplus-mcp-server
+    environment:
+      PATH: /workspace/energyplus-mcp-server/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    command: >
+      bash -lc "uv sync --extra dev && uv pip install --python .venv/bin/python -r requirements.txt -r requirements_calibration.txt && tail -f /dev/null"
+    volumes:
+      - ./energyplus-mcp-server:/workspace/energyplus-mcp-server
+      - energyplus_mcp_venv:/workspace/energyplus-mcp-server/.venv
+    ports:
+      - "3000:3000"
+      - "6274:6274"
+      - "8080:8080"
+      - "8501:8501"
+    tty: true
+    stdin_open: true
+
+volumes:
+  energyplus_mcp_venv:

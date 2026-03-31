@@ -12,27 +12,35 @@ A complete **Digital Twin Asset-Based Model (DTABM)** system that:
 
 ### Option 1: Run Complete Workflow (Recommended)
 ```bash
-cd ~/EnergyPlus-MCP
+cd ~/bayesian-energy-calibration
+docker compose up -d
 ./run_complete_dtabm_workflow.sh
 ```
 This runs all 4 steps automatically (takes ~10 minutes).
 
+### Visualize Results In Streamlit
+```bash
+cd ~/bayesian-energy-calibration
+./run_streamlit.sh
+```
+Then open `http://localhost:8501`.
+
 ### Option 2: Run Steps Individually
 ```bash
 # Start Docker container
-docker start energyplus-mcp
+docker compose up -d
 
 # Step 1: Energy Audit Data Collection
-docker exec energyplus-mcp python /workspace/energyplus-mcp-server/audit_to_model_workflow.py
+docker exec energyplus-mcp /workspace/energyplus-mcp-server/.venv/bin/python /workspace/energyplus-mcp-server/audit_to_model_workflow.py
 
 # Step 2: Build Initial Model
-docker exec energyplus-mcp python /workspace/energyplus-mcp-server/step2_build_initial_model.py
+docker exec energyplus-mcp /workspace/energyplus-mcp-server/.venv/bin/python /workspace/energyplus-mcp-server/step2_build_initial_model.py
 
 # Step 3: Bayesian Calibration (~10 min)
-docker exec energyplus-mcp python /workspace/energyplus-mcp-server/step3_bayesian_calibration.py
+docker exec energyplus-mcp /workspace/energyplus-mcp-server/.venv/bin/python /workspace/energyplus-mcp-server/step3_bayesian_calibration.py
 
 # Step 4: DTABM Digital Twin
-docker exec energyplus-mcp python /workspace/energyplus-mcp-server/dtabm_framework.py
+docker exec energyplus-mcp /workspace/energyplus-mcp-server/.venv/bin/python /workspace/energyplus-mcp-server/dtabm_framework.py
 ```
 
 ### Option 3: Copy Files to Your Own Project
@@ -172,8 +180,8 @@ open -a Docker
 
 ### "Container doesn't exist"
 ```bash
-cd ~/EnergyPlus-MCP
-docker-compose up -d
+cd ~/bayesian-energy-calibration
+docker compose up -d
 ```
 
 ### "Calibration error still >5%"

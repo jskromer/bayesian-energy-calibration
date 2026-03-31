@@ -21,6 +21,8 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import pandas as pd
 
+REPO_ROOT = Path(__file__).resolve().parent
+
 class DigitalTwinABM:
     """
     Digital Twin Asset-Based Model
@@ -33,7 +35,7 @@ class DigitalTwinABM:
 
     def __init__(self, calibrated_baseline_idf):
         self.baseline_idf = calibrated_baseline_idf
-        self.work_dir = Path("/workspace/energyplus-mcp-server/digital_twin")
+        self.work_dir = REPO_ROOT / "digital_twin"
         self.work_dir.mkdir(exist_ok=True)
 
         # Initialize digital twin structure
@@ -485,7 +487,7 @@ def main():
     print("="*80)
 
     # Initialize with calibrated baseline
-    calibrated_baseline = Path("/workspace/energyplus-mcp-server/calibration_workflow/baseline_calibrated.idf")
+    calibrated_baseline = REPO_ROOT / "calibration_workflow" / "baseline_calibrated.idf"
 
     if not calibrated_baseline.exists():
         print("\n❌ Calibrated baseline not found. Run steps 1-3 first.")

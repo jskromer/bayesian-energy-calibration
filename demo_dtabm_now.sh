@@ -14,7 +14,7 @@ echo ""
 echo "Running digital twin framework..."
 echo ""
 
-docker exec energyplus-mcp python /workspace/energyplus-mcp-server/dtabm_framework.py
+docker exec energyplus-mcp /workspace/energyplus-mcp-server/.venv/bin/python /workspace/energyplus-mcp-server/dtabm_framework.py
 
 echo ""
 echo "=========================================="
