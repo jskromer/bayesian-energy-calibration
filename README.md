@@ -4,7 +4,12 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PyMC](https://img.shields.io/badge/PyMC-5.26.1-green.svg)](https://www.pymc.io/)
 
-This repository now includes a Dockerized DTABM demo dashboard for exploring:
+This repository now includes two demo paths:
+
+- a lightweight Streamlit Community Cloud app at the repo root
+- a full local Dockerized DTABM dashboard under `energyplus-mcp-server`
+
+Together they cover:
 
 - Bayesian calibration outputs
 - digital twin model state
@@ -13,7 +18,15 @@ This repository now includes a Dockerized DTABM demo dashboard for exploring:
 
 ## Demo
 
-### Fastest Path
+### Streamlit Community Cloud
+
+Deploy the root app:
+
+- Main file: `streamlit_app.py`
+- Requirements: root `requirements.txt`
+- Deployment notes: [`STREAMLIT_DEPLOYMENT.md`](STREAMLIT_DEPLOYMENT.md)
+
+### Local Docker Demo
 
 ```bash
 git clone https://github.com/jskromer/bayesian-energy-calibration.git
