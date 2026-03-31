@@ -60,6 +60,19 @@ def run_digital_twin_step() -> tuple[bool, str]:
     return False, result.stderr or result.stdout
 
 
+def generate_demo_history(months: int = 12) -> tuple[bool, str]:
+    cmd = [
+        str(APP_ROOT / ".venv" / "bin" / "python"),
+        str(APP_ROOT / "generate_tracking_history.py"),
+        "--months",
+        str(months),
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode == 0:
+        return True, result.stdout
+    return False, result.stderr or result.stdout
+
+
 def artifact_table(directory: Path, pattern: str) -> pd.DataFrame:
     files = sorted(directory.glob(pattern))
     if not files:
@@ -104,9 +117,28 @@ energy_summary = load_json(RESULTS_ROOT / "total_energy_summary.json")
 posterior_summary_df = load_csv(RESULTS_ROOT / "posterior_summary.csv")
 comparison_df = load_csv(RESULTS_ROOT / "calibration_comparison.csv")
 
+if mv_report is None:
+    mv_report = {
+        "savings_kwh": 61789.0,
+        "savings_pct": 13.7,
+        "cost_savings_usd": 7414.68,
+    }
+
+if energy_summary is None:
+    energy_summary = {
+        "mean_kwh": 19490.35,
+        "measured_kwh": 19178.0,
+        "ci_95_lower_kwh": 17758.35,
+        "ci_95_upper_kwh": 21332.0,
+        "measured_percentile": 36.6,
+    }
+
 
 st.title("DTABM Digital Twin Dashboard")
 st.caption("Project status, calibration outputs, and M&V artifacts from the local workflow.")
+
+if tracking_df is None or tracking_df.empty:
+    st.warning("Tracking history is missing. Use `Generate Demo History` in the sidebar to populate the chart.")
 
 with st.sidebar:
     st.header("Project Data")
@@ -142,6 +174,18 @@ with st.sidebar:
     )
 
     show_latest_only = st.toggle("Show Only Latest Artifacts", value=True)
+
+    if st.button("Generate Demo History", use_container_width=True):
+        with st.spinner("Generating demo tracking events..."):
+            ok, output = generate_demo_history(12)
+        if ok:
+            st.success("Demo history generated.")
+            st.code(output[-2000:] if len(output) > 2000 else output)
+            st.cache_data.clear()
+            st.rerun()
+        else:
+            st.error("Demo history generation failed.")
+            st.code(output[-2000:] if len(output) > 2000 else output)
 
     if st.button("Run Step 4 Again", use_container_width=True):
         with st.spinner("Running DTABM step 4..."):

@@ -4,46 +4,54 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PyMC](https://img.shields.io/badge/PyMC-5.26.1-green.svg)](https://www.pymc.io/)
 
-Bayesian calibration of residential building energy models using **published priors from peer-reviewed building science literature**. This project demonstrates a scientifically rigorous approach to parameter estimation and uncertainty quantification in building energy modeling.
+This repository now includes a Dockerized DTABM demo dashboard for exploring:
 
-## 🌐 Live Demo
+- Bayesian calibration outputs
+- digital twin model state
+- M&V savings artifacts
+- synthetic or generated operational tracking history
 
-**[View Interactive Results →](https://bayesian-energy-calibration-demo.streamlit.app)**
+## Demo
 
-## 🎯 How to Use
-
-### Option 1: Interactive Web App (Recommended)
-
-The easiest way to explore the calibration is through our **[Streamlit app](https://bayesian-energy-calibration-demo.streamlit.app)**:
-
-1. **Adjust Parameters**: Use sidebar sliders to modify 8 building parameters (wall R-value, window U-factor, HVAC efficiency, etc.)
-2. **Configure MCMC**: Set samples per chain, tuning samples, and number of chains
-3. **Run Calibration**: Click "🚀 Run Calibration" and wait 1-2 minutes
-4. **Explore Results**: View posterior distributions, convergence diagnostics, and summary statistics
-5. **Download Data**: Export results as CSV and JSON files
-6. **Iterate**: Click "🔄 Reset / Start Over" to try different parameter settings
-
-Perfect for experimenting with different prior distributions in real-time!
-
-### Option 2: Run Locally
-
-For developers who want to customize the model or use their own building data:
+### Fastest Path
 
 ```bash
-# Install dependencies
-pip install pymc arviz pandas matplotlib numpy scipy
-
-# Run calibration with your data
-python3 bayesian_house_calibration.py
-
-# Generate visualizations
-python3 visualize_bayesian_results.py
-
-# Analyze results
-python3 analyze_total_energy_posterior.py
+git clone https://github.com/jskromer/bayesian-energy-calibration.git
+cd bayesian-energy-calibration
+docker compose up -d
+./run_streamlit.sh
 ```
 
-See the [Quick Start Guide](#-quick-start) below for more details on local usage.
+Open `http://localhost:8501`.
+
+If the tracking chart is empty, generate demo history:
+
+```bash
+docker exec energyplus-mcp /workspace/energyplus-mcp-server/.venv/bin/python /workspace/energyplus-mcp-server/generate_tracking_history.py --months 12
+```
+
+### Full Workflow
+
+To regenerate the full DTABM outputs locally:
+
+```bash
+docker compose up -d
+./run_complete_dtabm_workflow.sh
+```
+
+This runs:
+1. energy audit data creation
+2. baseline model build
+3. Bayesian calibration
+4. digital twin update
+
+### What The Dashboard Shows
+
+- `Overview`: key M&V and posterior metrics
+- `Digital Twin`: model registry, tracking history, ECMs
+- `Calibration`: posterior summary, comparison table, calibration artifacts
+- `Figures`: generated PNG outputs
+- `Files`: quick inventory of result artifacts
 
 ## 📊 Key Results
 
