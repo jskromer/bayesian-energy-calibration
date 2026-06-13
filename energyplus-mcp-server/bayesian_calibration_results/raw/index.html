@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Raw EnergyPlus Output Files</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+           max-width: 960px; margin: 40px auto; padding: 0 20px; color: #222; line-height: 1.5; }
+    h1 { border-bottom: 2px solid #667eea; padding-bottom: 8px; }
+    h2 { margin-top: 32px; color: #444; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+    th { background: #f5f6fa; }
+    a { color: #5b6ee1; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { background: #f5f6fa; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+    .note { background: #fff8e1; border-left: 4px solid #f0b400; padding: 10px 14px; margin: 16px 0; }
+    .back { display: inline-block; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <a class="back" href="../">&larr; Back to results dashboard</a>
+  <h1>Raw EnergyPlus Output Files</h1>
+  <p>Direct downloads of the standard <code>eplusout.*</code> output files produced by each simulation run.
+     Open <code>eplustbl.htm</code> in your browser for the human-readable summary report; <code>.eso</code>,
+     <code>.mtr</code>, and <code>.sql</code> are the time-series outputs consumed by post-processing tools
+     (eppy, esoreader, SQL queries, etc.).</p>
+
+  <div class="note">
+    File legend: <code>.eso</code> hourly variables · <code>.mtr</code> meters · <code>.sql</code> SQLite database ·
+    <code>.eio</code> input echo · <code>.rdd</code>/<code>.mdd</code> available variables/meters ·
+    <code>.err</code> warnings &amp; errors · <code>.htm</code> tabular summary report.
+  </div>
+
+  <h2>initial_run &mdash; baseline (pre-calibration)</h2>
+  <table>
+    <tr><th>File</th><th>Purpose</th></tr>
+    <tr><td><a href="initial_run/eplustbl.htm">eplustbl.htm</a></td><td>Tabular summary report (open in browser)</td></tr>
+    <tr><td><a href="initial_run/eplusout.err">eplusout.err</a></td><td>Warnings and errors</td></tr>
+    <tr><td><a href="initial_run/eplusout.eio">eplusout.eio</a></td><td>Input echo / equipment summary</td></tr>
+    <tr><td><a href="initial_run/eplusout.rdd">eplusout.rdd</a></td><td>Report variable dictionary</td></tr>
+    <tr><td><a href="initial_run/eplusout.mdd">eplusout.mdd</a></td><td>Meter dictionary</td></tr>
+    <tr><td><a href="initial_run/eplusout.bnd">eplusout.bnd</a></td><td>Branch/node connection summary</td></tr>
+    <tr><td><a href="initial_run/eplusout.audit">eplusout.audit</a></td><td>Input processor audit</td></tr>
+    <tr><td><a href="initial_run/eplusssz.csv">eplusssz.csv</a></td><td>System sizing details</td></tr>
+    <tr><td><a href="initial_run/epluszsz.csv">epluszsz.csv</a></td><td>Zone sizing details</td></tr>
+    <tr><td><a href="initial_run/eplusout.eso">eplusout.eso</a></td><td>Hourly time-series variables (~7 MB)</td></tr>
+    <tr><td><a href="initial_run/eplusout.mtr">eplusout.mtr</a></td><td>Meter time-series (~1.8 MB)</td></tr>
+    <tr><td><a href="initial_run/eplusout.sql">eplusout.sql</a></td><td>SQLite database (~8.5 MB)</td></tr>
+    <tr><td><a href="initial_run/eplusout.end">eplusout.end</a></td><td>Run status line</td></tr>
+  </table>
+
+  <h2>run_training_8 &mdash; final calibrated sample</h2>
+  <table>
+    <tr><th>File</th><th>Purpose</th></tr>
+    <tr><td><a href="run_training_8/eplustbl.htm">eplustbl.htm</a></td><td>Tabular summary report</td></tr>
+    <tr><td><a href="run_training_8/eplusout.err">eplusout.err</a></td><td>Warnings and errors</td></tr>
+    <tr><td><a href="run_training_8/eplusout.eio">eplusout.eio</a></td><td>Input echo</td></tr>
+    <tr><td><a href="run_training_8/eplusout.rdd">eplusout.rdd</a></td><td>Report variable dictionary</td></tr>
+    <tr><td><a href="run_training_8/eplusout.mdd">eplusout.mdd</a></td><td>Meter dictionary</td></tr>
+    <tr><td><a href="run_training_8/eplusout.bnd">eplusout.bnd</a></td><td>Branch/node connection summary</td></tr>
+    <tr><td><a href="run_training_8/eplusout.audit">eplusout.audit</a></td><td>Input processor audit</td></tr>
+    <tr><td><a href="run_training_8/eplusssz.csv">eplusssz.csv</a></td><td>System sizing</td></tr>
+    <tr><td><a href="run_training_8/epluszsz.csv">epluszsz.csv</a></td><td>Zone sizing</td></tr>
+    <tr><td><a href="run_training_8/eplusout.eso">eplusout.eso</a></td><td>Hourly time-series variables (~7.4 MB)</td></tr>
+    <tr><td><a href="run_training_8/eplusout.mtr">eplusout.mtr</a></td><td>Meter time-series (~1.8 MB)</td></tr>
+    <tr><td><a href="run_training_8/eplusout.sql">eplusout.sql</a></td><td>SQLite database (~8.8 MB)</td></tr>
+    <tr><td><a href="run_training_8/eplusout.end">eplusout.end</a></td><td>Run status line</td></tr>
+  </table>
+
+  <h2>annual_results &mdash; annual run summary</h2>
+  <table>
+    <tr><th>File</th><th>Purpose</th></tr>
+    <tr><td><a href="annual_results/eplusout.end">eplusout.end</a></td><td>Run status line</td></tr>
+    <tr><td><a href="annual_results/eplusout.err">eplusout.err</a></td><td>Warnings and errors</td></tr>
+  </table>
+</body>
+</html>
